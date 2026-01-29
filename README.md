@@ -1,4 +1,3 @@
-FlowPress: Autonomous Content Engine
 
 # FlowPress: Autonomous Content Engine
 > **The Autonomous Content Foundry powered by Gemini 3.**
