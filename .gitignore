@@ -46,3 +46,11 @@ dev.db
 
 # Assets
 generated_assets/
+
+# Deployment Scripts
+*deploy*.ps1
+*deploy*.sh
+*install-gcloud*.ps1
+*setup-gcloud*.ps1
+web/*deploy*.ps1
+web/*.sh
