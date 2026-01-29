@@ -1,0 +1,52 @@
+# Ignore web application directory completely
+web/
+web/**
+
+# Python cache
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Environment files
+.env
+.env.local
+
+# Test files
+test_*.py
+*_test.py
+test_*.txt
+*_out.txt
+debug_output.txt
+verify_out.txt
+
+# Generated assets (will be stored in Cloud Storage)
+generated_assets/
+
+# Development files
+.git/
+.gitignore
+.vscode/
+.idea/
+*.md
+README*
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Deployment scripts (not needed in container)
+deploy-*.ps1
+deploy-*.sh
+install-*.ps1
+setup-*.ps1

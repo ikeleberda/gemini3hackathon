@@ -1,0 +1,48 @@
+# Environments
+.env
+.env.local
+.env.*.local
+
+# Google Cloud Keys
+pihrate-hub-c8f3s-*.json
+service-account-*.json
+*-key.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+.env/
+
+# Logs and debug
+*.log
+debug_output.txt
+test_api_out.txt
+test_api_flash_out.txt
+verify_out.txt
+test_output.txt
+test_write.txt
+web/test_output.txt
+web/test_write.txt
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Web (if not covered by web/.gitignore)
+web/node_modules/
+web/.next/
+web/out/
+web/dev.db
+web/prisma/dev.db
+
+# Databases
+*.db
+*.sqlite
+dev.db
+
+# Assets
+generated_assets/

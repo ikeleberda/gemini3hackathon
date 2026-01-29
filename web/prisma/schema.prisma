@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  password     String
+  name         String?
+  googleApiKey String?
+  websites     Website[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Website {
+  id          String        @id @default(cuid())
+  url         String
+  username    String
+  appPassword String
+  userId      String
+  user        User          @relation(fields: [userId], references: [id])
+  content     ContentItem[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model ContentItem {
+  id           String     @id @default(cuid())
+  title        String
+  topic        String
+  status       String     @default("DRAFT") // DRAFT, SCHEDULED, PUBLISHED
+  publishedUrl String?
+  scheduledFor DateTime?
+  websiteId    String
+  website      Website    @relation(fields: [websiteId], references: [id])
+  jobs         AgentJob[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model AgentJob {
+  id            String      @id @default(cuid())
+  status        String      @default("PENDING") // PENDING, RUNNING, COMPLETED, FAILED
+  logs          String?
+  currentStep   String?
+  contentItemId String
+  contentItem   ContentItem @relation(fields: [contentItemId], references: [id])
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}

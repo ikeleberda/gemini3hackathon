@@ -1,0 +1,63 @@
+# .gcloudignore - Exclude files from gcloud deployment
+# This file is similar to .gitignore but for gcloud deployments
+
+# Web application directory
+web/
+web/**
+
+# Python cache
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Environment files
+.env
+.env.local
+.env.example
+
+# Test files
+test_*.py
+*_test.py
+test_*.txt
+*_out.txt
+debug_output.txt
+verify_out.txt
+inspect_published.py
+dump_logs.py
+repro_terms.py
+verify_links.py
+
+# Generated assets
+generated_assets/
+
+# Development files
+.git/
+.gitignore
+.vscode/
+.idea/
+*.md
+README*
+DEPLOYMENT.md
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Deployment scripts
+deploy-*.ps1
+deploy-*.sh
+install-*.ps1
+setup-*.ps1
+*.ps1
+*.sh
