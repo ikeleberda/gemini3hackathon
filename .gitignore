@@ -54,3 +54,6 @@ generated_assets/
 *setup-gcloud*.ps1
 web/*deploy*.ps1
 web/*.sh
+
+Dockerfile
+web/Dockerfile
