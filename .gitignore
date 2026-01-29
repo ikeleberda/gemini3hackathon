@@ -57,3 +57,5 @@ web/*.sh
 
 Dockerfile
 web/Dockerfile
+
+DEPLOYMENT.md
