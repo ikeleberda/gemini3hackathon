@@ -1,9 +1,24 @@
-# Fractal Aphelion
+FlowPress: Autonomous Content Engine
 
-**Fractal Aphelion** is an autonomous multi-agent content generation system powered by Google Gemini. It automates the process of researching, writing, optimizing, and publishing high-quality content to WordPress websites.
+# FlowPress: Autonomous Content Engine
+> **The Autonomous Content Foundry powered by Gemini 3.**
+
+FlowPress: Autonomous Content Engine is not just a writer—it's an intelligent agency. It orchestrates a swarm of **Gemini 3 powered agents** to research, reason, write, critique, and publish high-quality content to WordPress.
+
+## 🏆 Gemini 3 Hackathon Submission
+*   **Reasoning Engine:** Google Gemini 3
+*   **Architecture:** Multi-Agent Swarm (Google ADK)
+
+## 🧠 Why Gemini 3?
+Content generation is easy; **accurate** content generation is hard. We use Gemini 3's advanced reasoning to:
+1.  **Fact-Check in Loop:** The `Manager Agent` uses Gemini 3 to self-critique outlines before writing begins.
+2.  **Hallucination Prevention:** Unlike standard LLMs that blindly write, our system uses Gemini 3 to verify its own citations against real sources.
+3.  **Complex Structuring:** Uses reasoning to plan long-form content that maintains logical consistency across 2,000+ words.
 
 ## 🚀 Key Features
-
+*   **🧠 Cognitive Architecture:** Uses **Gemini 3** to "think" before it writes. The Manager Agent plans the content strategy, ensuring logical flow and factual accuracy.
+*   **🕵️ Deep Research Agent:** Scrapes live web data and uses Gemini's reasoning to filter reliable sources from noise.
+*   **⚡ Cost-Optimized Fallback:** Intelligently routes complex reasoning tasks to **Gemini 3** and bulk generation to **Gemini Flash**.
 *   **Multi-Agent Workflow**: Orchestrates specialized AI agents for different stages of content creation:
     *   **Manager Agent**: Coordinates the workflow and handles high-level decision making.
     *   **Research Agent**: Gathers accurate information and sources from the web.
