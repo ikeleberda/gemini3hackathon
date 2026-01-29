@@ -2,17 +2,21 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { Edit2, Trash2, X, Check, Search } from "lucide-react";
 
 interface Website {
     id: string;
     url: string;
     username: string;
+    appPassword?: string;
 }
 
 export default function WebsitesPage() {
     const [websites, setWebsites] = useState<Website[]>([]);
     const [loading, setLoading] = useState(true);
     const [newSite, setNewSite] = useState({ url: "", username: "", appPassword: "" });
+    const [editingId, setEditingId] = useState<string | null>(null);
+    const [editData, setEditData] = useState({ url: "", username: "", appPassword: "" });
 
     useEffect(() => {
         fetchWebsites();
@@ -43,6 +47,40 @@ export default function WebsitesPage() {
         }
     };
 
+    const handleDelete = async (id: string) => {
+        if (!confirm("Are you sure you want to delete this website?")) return;
+
+        const res = await fetch(`/api/websites/${id}`, {
+            method: "DELETE"
+        });
+
+        if (res.ok) {
+            fetchWebsites();
+        } else {
+            alert("Failed to delete website");
+        }
+    };
+
+    const startEditing = (site: Website) => {
+        setEditingId(site.id);
+        setEditData({ url: site.url, username: site.username, appPassword: "" });
+    };
+
+    const handleUpdate = async (id: string) => {
+        const res = await fetch(`/api/websites/${id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(editData)
+        });
+
+        if (res.ok) {
+            setEditingId(null);
+            fetchWebsites();
+        } else {
+            alert("Failed to update website");
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gray-50 py-10">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -64,13 +102,38 @@ export default function WebsitesPage() {
                                 <ul role="list" className="divide-y divide-gray-100 mt-4">
                                     {websites.length === 0 && <p className="text-gray-500 text-sm">No websites connected yet.</p>}
                                     {websites.map((site) => (
-                                        <li key={site.id} className="flex justify-between gap-x-6 py-5">
-                                            <div className="flex min-w-0 gap-x-4">
-                                                <div className="min-w-0 flex-auto">
-                                                    <p className="text-sm font-semibold leading-6 text-gray-900">{site.url}</p>
-                                                    <p className="mt-1 truncate text-xs leading-5 text-gray-500">{site.username}</p>
+                                        <li key={site.id} className="flex justify-between gap-x-6 py-5 items-center">
+                                            {editingId === site.id ? (
+                                                <div className="flex-1 space-y-2">
+                                                    <input type="url" className="text-sm border rounded px-2 py-1 w-full"
+                                                        value={editData.url} onChange={e => setEditData({ ...editData, url: e.target.value })} />
+                                                    <input type="text" className="text-sm border rounded px-2 py-1 w-full"
+                                                        value={editData.username} onChange={e => setEditData({ ...editData, username: e.target.value })} />
+                                                    <input type="password" placeholder="New App Password (optional)" className="text-sm border rounded px-2 py-1 w-full"
+                                                        value={editData.appPassword} onChange={e => setEditData({ ...editData, appPassword: e.target.value })} />
+                                                    <div className="flex gap-2">
+                                                        <button onClick={() => handleUpdate(site.id)} className="text-green-600 hover:text-green-500"><Check className="h-4 w-4" /></button>
+                                                        <button onClick={() => setEditingId(null)} className="text-red-600 hover:text-red-500"><X className="h-4 w-4" /></button>
+                                                    </div>
                                                 </div>
-                                            </div>
+                                            ) : (
+                                                <>
+                                                    <div className="flex min-w-0 gap-x-4">
+                                                        <div className="min-w-0 flex-auto">
+                                                            <p className="text-sm font-semibold leading-6 text-gray-900">{site.url}</p>
+                                                            <p className="mt-1 truncate text-xs leading-5 text-gray-500">{site.username}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex gap-3">
+                                                        <button onClick={() => startEditing(site)} className="text-gray-400 hover:text-indigo-600 transition-colors">
+                                                            <Edit2 className="h-4 w-4" />
+                                                        </button>
+                                                        <button onClick={() => handleDelete(site.id)} className="text-gray-400 hover:text-red-600 transition-colors">
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </button>
+                                                    </div>
+                                                </>
+                                            )}
                                         </li>
                                     ))}
                                 </ul>
@@ -114,3 +177,4 @@ export default function WebsitesPage() {
         </div>
     );
 }
+

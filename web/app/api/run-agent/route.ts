@@ -30,7 +30,10 @@ export async function POST(req: Request) {
 
         if (!content) return NextResponse.json({ message: "Content not found" }, { status: 404 });
 
-        const googleApiKey = content.website.user.googleApiKey;
+        const user = content.website.user as any;
+        const googleApiKey = user.googleApiKey;
+        const googleModelName = user.googleModelName;
+        const googleFallbackModels = user.googleFallbackModels;
 
         if (!googleApiKey) {
             return NextResponse.json({
@@ -63,6 +66,8 @@ export async function POST(req: Request) {
                         job_id: job.id,
                         db_url: process.env.DATABASE_URL, // Pass the DB URL for direct logging
                         google_api_key: googleApiKey,
+                        google_model_name: googleModelName,
+                        google_fallback_models: googleFallbackModels,
                         wp_config: {
                             url: content.website.url,
                             username: content.website.username,

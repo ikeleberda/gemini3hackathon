@@ -1,4 +1,4 @@
-# Deploy Next.js web app to Google Cloud Run (PowerShell version)
+﻿# Deploy Next.js web app to Google Cloud Run (PowerShell version)
 
 $ErrorActionPreference = "Stop"
 
@@ -7,28 +7,27 @@ $REGION = "us-central1"
 $SERVICE_NAME = "fractal-web"
 $IMAGE_NAME = "gcr.io/$PROJECT_ID/$SERVICE_NAME"
 
-Write-Host "[DEPLOY] Deploying web app to Google Cloud Run..." -ForegroundColor Cyan
+Write-Host "ðŸš€ Deploying web app to Google Cloud Run..." -ForegroundColor Cyan
 Write-Host "Project: $PROJECT_ID"
 Write-Host "Region: $REGION"
 Write-Host "Service: $SERVICE_NAME"
 Write-Host ""
 
 # Check if we need to create a Cloud SQL instance or use Neon/external DB
-Write-Host "[CHECK] Checking environment and infrastructure..." -ForegroundColor Cyan
+Write-Host "ðŸ” Checking environment and infrastructure..." -ForegroundColor Cyan
 
 # Try to get backend URL automatically
 $BACKEND_URL = gcloud run services describe fractal-backend --project $PROJECT_ID --region $REGION --format 'value(status.url)' 2>$null
 if ($BACKEND_URL) {
-    Write-Host "[OK] Found backend service: $BACKEND_URL" -ForegroundColor Green
-}
-else {
-    Write-Host "[WARN] Could not find fractal-backend service. Link it manually after deployment." -ForegroundColor Yellow
+    Write-Host "âœ… Found backend service: $BACKEND_URL" -ForegroundColor Green
+} else {
+    Write-Host "âš ï¸  Could not find fractal-backend service. Link it manually after deployment." -ForegroundColor Yellow
 }
 
 # Try to get Cloud SQL instance connection name
 $SQL_INSTANCE = gcloud sql instances describe fractal-db --project $PROJECT_ID --format 'value(connectionName)' 2>$null
 if ($SQL_INSTANCE) {
-    Write-Host "[OK] Found Cloud SQL instance: $SQL_INSTANCE" -ForegroundColor Green
+    Write-Host "âœ… Found Cloud SQL instance: $SQL_INSTANCE" -ForegroundColor Green
 }
 
 # Build environment variables list
@@ -36,7 +35,7 @@ $envVars = @()
 $DATABASE_URL = "postgresql://postgres:FractalPassword123!@localhost/fractal?host=/cloudsql/$SQL_INSTANCE"
 
 if ($null -eq $SQL_INSTANCE) {
-    Write-Host "[WARN] Cloud SQL instance 'fractal-db' not found. Using placeholder." -ForegroundColor Yellow
+    Write-Host "âš ï¸  Cloud SQL instance 'fractal-db' not found. Using placeholder." -ForegroundColor Yellow
     $DATABASE_URL = "postgresql://placeholder:placeholder@localhost/placeholder"
 }
 
@@ -53,7 +52,7 @@ $envVars += "NEXTAUTH_SECRET=$NEXTAUTH_SECRET"
 $envVarsString = $envVars -join ","
 
 # Deploy to Cloud Run
-Write-Host "[DEPLOY] Deploying to Cloud Run using source code..." -ForegroundColor Cyan
+Write-Host "ðŸš€ Deploying to Cloud Run using source code..." -ForegroundColor Cyan
 
 $deployArgs = @(
     "run", "deploy", $SERVICE_NAME,
@@ -78,12 +77,12 @@ if ($SQL_INSTANCE) {
 gcloud @deployArgs
 
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "[ERROR] Deployment failed!" -ForegroundColor Red
+    Write-Host "âŒ Deployment failed!" -ForegroundColor Red
     exit 1
 }
 
 Write-Host ""
-Write-Host "[OK] Deployment complete!" -ForegroundColor Green
+Write-Host "âœ… Deployment complete!" -ForegroundColor Green
 Write-Host ""
 Write-Host "Service URL:"
 $serviceUrl = gcloud run services describe $SERVICE_NAME `
@@ -93,7 +92,10 @@ $serviceUrl = gcloud run services describe $SERVICE_NAME `
 
 Write-Host $serviceUrl -ForegroundColor Cyan
 Write-Host ""
-Write-Host "[NEXT STEPS]" -ForegroundColor Yellow
+Write-Host "âš ï¸  NEXT STEPS:" -ForegroundColor Yellow
 Write-Host "1. Verify DATABASE_URL if not using Cloud SQL."
 Write-Host "2. Set NEXTAUTH_URL to enable authentication:"
 Write-Host "   gcloud run services update $SERVICE_NAME --region $REGION --update-env-vars NEXTAUTH_URL=$serviceUrl"
+
+ 
+# END

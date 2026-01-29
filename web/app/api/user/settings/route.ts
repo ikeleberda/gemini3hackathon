@@ -15,14 +15,21 @@ export async function GET() {
             where: { email: session.user.email },
             select: {
                 googleApiKey: true,
-            }
+                googleModelName: true,
+                googleFallbackModels: true,
+            } as any
         });
 
         if (!user) {
             return NextResponse.json({ message: "User not found" }, { status: 404 });
         }
 
-        return NextResponse.json({ googleApiKey: user.googleApiKey });
+        const userData = user as any;
+        return NextResponse.json({
+            googleApiKey: userData.googleApiKey,
+            googleModelName: userData.googleModelName,
+            googleFallbackModels: userData.googleFallbackModels,
+        });
     } catch (error) {
         console.error(error);
         return NextResponse.json({ message: "Error fetching settings" }, { status: 500 });
@@ -37,13 +44,15 @@ export async function POST(req: Request) {
     }
 
     try {
-        const { googleApiKey } = await req.json();
+        const { googleApiKey, googleModelName, googleFallbackModels } = await req.json();
 
         await prisma.user.update({
             where: { email: session.user.email },
             data: {
                 googleApiKey,
-            }
+                googleModelName,
+                googleFallbackModels,
+            } as any
         });
 
         return NextResponse.json({ message: "Settings updated successfully" });

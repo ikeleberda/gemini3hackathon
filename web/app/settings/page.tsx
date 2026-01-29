@@ -6,6 +6,8 @@ import Link from "next/link";
 
 export default function SettingsPage() {
     const [googleApiKey, setGoogleApiKey] = useState("");
+    const [googleModelName, setGoogleModelName] = useState("");
+    const [googleFallbackModels, setGoogleFallbackModels] = useState("");
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [message, setMessage] = useState({ text: "", type: "" });
@@ -14,9 +16,9 @@ export default function SettingsPage() {
         fetch("/api/user/settings")
             .then((res) => res.json())
             .then((data) => {
-                if (data.googleApiKey) {
-                    setGoogleApiKey(data.googleApiKey);
-                }
+                if (data.googleApiKey) setGoogleApiKey(data.googleApiKey);
+                if (data.googleModelName) setGoogleModelName(data.googleModelName);
+                if (data.googleFallbackModels) setGoogleFallbackModels(data.googleFallbackModels);
                 setIsLoading(false);
             })
             .catch((err) => {
@@ -34,7 +36,7 @@ export default function SettingsPage() {
             const res = await fetch("/api/user/settings", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ googleApiKey }),
+                body: JSON.stringify({ googleApiKey, googleModelName, googleFallbackModels }),
             });
 
             if (res.ok) {
@@ -103,8 +105,42 @@ export default function SettingsPage() {
                                             value={googleApiKey}
                                             onChange={(e) => setGoogleApiKey(e.target.value)}
                                             className="block w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                            placeholder="Enter your Google API prompt..."
+                                            placeholder="Enter your Google Gemini API key..."
                                             required
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label htmlFor="modelName" className="block text-sm font-medium text-gray-700">
+                                            Primary Gemini Model
+                                        </label>
+                                        <p className="mt-1 text-xs text-gray-500 mb-2">
+                                            Default is <code>gemini-2.0-flash</code>.
+                                        </p>
+                                        <input
+                                            type="text"
+                                            id="modelName"
+                                            value={googleModelName}
+                                            onChange={(e) => setGoogleModelName(e.target.value)}
+                                            className="block w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                            placeholder="e.g. gemini-2.0-flash"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label htmlFor="fallbackModels" className="block text-sm font-medium text-gray-700">
+                                            Fallback Models
+                                        </label>
+                                        <p className="mt-1 text-xs text-gray-500 mb-2">
+                                            Comma-separated list of models to try if the primary fails.
+                                        </p>
+                                        <input
+                                            type="text"
+                                            id="fallbackModels"
+                                            value={googleFallbackModels}
+                                            onChange={(e) => setGoogleFallbackModels(e.target.value)}
+                                            className="block w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                            placeholder="e.g. gemini-1.5-flash, gemini-1.5-pro"
                                         />
                                     </div>
                                 </div>

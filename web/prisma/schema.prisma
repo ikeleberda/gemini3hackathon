@@ -12,10 +12,12 @@ model User {
   email        String   @unique
   password     String
   name         String?
-  googleApiKey String?
-  websites     Website[]
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  googleApiKey         String?
+  googleModelName      String?
+  googleFallbackModels String?
+  websites             Website[]
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 }
 
 model Website {
