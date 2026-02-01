@@ -30,6 +30,10 @@ export async function POST(req: Request) {
 
         if (!content) return NextResponse.json({ message: "Content not found" }, { status: 404 });
 
+        if (!content.website) {
+            return NextResponse.json({ message: "Content has no website configured" }, { status: 400 });
+        }
+
         const user = content.website.user as any;
         const googleApiKey = user.googleApiKey;
         const googleModelName = user.googleModelName;
@@ -69,9 +73,9 @@ export async function POST(req: Request) {
                         google_model_name: googleModelName,
                         google_fallback_models: googleFallbackModels,
                         wp_config: {
-                            url: content.website.url,
-                            username: content.website.username,
-                            password: content.website.appPassword
+                            url: content.website!.url,
+                            username: content.website!.username,
+                            password: content.website!.appPassword
                         }
                     })
                 });

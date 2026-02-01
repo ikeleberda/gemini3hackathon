@@ -39,8 +39,8 @@ model ContentItem {
   status       String     @default("DRAFT") // DRAFT, SCHEDULED, PUBLISHED
   publishedUrl String?
   scheduledFor DateTime?
-  websiteId    String
-  website      Website    @relation(fields: [websiteId], references: [id])
+  websiteId    String?
+  website      Website?   @relation(fields: [websiteId], references: [id])
   jobs         AgentJob[]
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
