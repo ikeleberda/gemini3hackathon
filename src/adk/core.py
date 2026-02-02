@@ -8,27 +8,80 @@ try:
     from google.adk import AgentContext as OfficialAgentContext
     print("[ADK] Using official google-adk classes.")
     
+    def _update_db_logs(context_obj):
+        """Helper to update database logs in real-time."""
+        if not (context_obj.db_url and context_obj.job_id):
+            return
+
+        try:
+            # Extract current step (last agent tag)
+            lines = "\n".join(context_obj.history).strip().split("\n")
+            current_step = None
+            import re
+            for i in range(len(lines)-1, -1, -1):
+                match = re.match(r"^\[([^\]]+)\]\s*(.*)$", lines[i].strip())
+                if match:
+                    current_step = f"{match.group(1)}: {match.group(2)}"[:100]
+                    break
+
+            if context_obj.db_url.startswith("file:") or "sqlite" in context_obj.db_url.lower():
+                import sqlite3
+                db_path = context_obj.db_url.replace("file:", "")
+                if "?" in db_path: db_path = db_path.split("?")[0]
+                conn = sqlite3.connect(db_path)
+                cur = conn.cursor()
+                cur.execute(
+                    'UPDATE "AgentJob" SET "logs" = ?, "currentStep" = ?, "updatedAt" = CURRENT_TIMESTAMP WHERE "id" = ?',
+                    ("\n".join(context_obj.history), current_step, context_obj.job_id)
+                )
+            else:
+                import psycopg2
+                from urllib.parse import urlparse, parse_qs, unquote
+                parsed = urlparse(context_obj.db_url)
+                params = parse_qs(parsed.query)
+                
+                # Robust parsing for Prisma-style URLs and Unix sockets
+                host = params.get('host', [None])[0] or parsed.hostname
+                
+                connect_params = {
+                    "dbname": parsed.path.lstrip('/'),
+                    "user": parsed.username,
+                    "password": unquote(parsed.password) if parsed.password else None,
+                    "host": host
+                }
+                connect_params = {k: v for k, v in connect_params.items() if v is not None}
+                
+                conn = psycopg2.connect(**connect_params)
+                cur = conn.cursor()
+                cur.execute(
+                    'UPDATE "AgentJob" SET "logs" = %s, "currentStep" = %s, "updatedAt" = NOW() WHERE "id" = %s',
+                    ("\n".join(context_obj.history), current_step, context_obj.job_id)
+                )
+            conn.commit()
+            cur.close()
+            conn.close()
+        except Exception as db_err:
+            print(f"[DB LOG ERROR] {db_err}")
+
     class AgentContext(OfficialAgentContext):
         """Adapter for AgentContext."""
         def __init__(self):
-            # Custom initialization if needed, or pass-through
+            # Custom initialization
             self.history = []
             self.topic = ""
             self.is_simulated = False
             self.google_api_key = None
+            self.db_url = None
+            self.job_id = None
             super().__init__()
 
         def log(self, message: str):
             self.history.append(message)
             try:
                 print(f"[System Log] {message}")
-            except UnicodeEncodeError:
-                import sys
-                try:
-                    encoding = sys.stdout.encoding or 'utf-8'
-                    print(f"[System Log] {message.encode(encoding, errors='replace').decode(encoding)}")
-                except Exception:
-                    print(f"[System Log] [Encoding Error] Logging message failed.")
+            except Exception:
+                pass
+            _update_db_logs(self)
 
     class BaseAgent(OfficialBaseAgent):
         """Adapter for BaseAgent."""
@@ -42,6 +95,62 @@ try:
 
 except ImportError:
     print("[ADK] Official google-adk not found or incompatible. Using local shim.")
+    
+    def _update_db_logs(context_obj):
+        """Helper to update database logs in real-time."""
+        if not (context_obj.db_url and context_obj.job_id):
+            return
+
+        try:
+            # Extract current step (last agent tag)
+            lines = "\n".join(context_obj.history).strip().split("\n")
+            current_step = None
+            import re
+            for i in range(len(lines)-1, -1, -1):
+                match = re.match(r"^\[([^\]]+)\]\s*(.*)$", lines[i].strip())
+                if match:
+                    current_step = f"{match.group(1)}: {match.group(2)}"[:100]
+                    break
+
+            if context_obj.db_url.startswith("file:") or "sqlite" in context_obj.db_url.lower():
+                import sqlite3
+                db_path = context_obj.db_url.replace("file:", "")
+                if "?" in db_path: db_path = db_path.split("?")[0]
+                conn = sqlite3.connect(db_path)
+                cur = conn.cursor()
+                cur.execute(
+                    'UPDATE "AgentJob" SET "logs" = ?, "currentStep" = ?, "updatedAt" = CURRENT_TIMESTAMP WHERE "id" = ?',
+                    ("\n".join(context_obj.history), current_step, context_obj.job_id)
+                )
+            else:
+                import psycopg2
+                from urllib.parse import urlparse, parse_qs, unquote
+                parsed = urlparse(context_obj.db_url)
+                params = parse_qs(parsed.query)
+                
+                # Robust parsing for Prisma-style URLs and Unix sockets
+                host = params.get('host', [None])[0] or parsed.hostname
+                
+                connect_params = {
+                    "dbname": parsed.path.lstrip('/'),
+                    "user": parsed.username,
+                    "password": unquote(parsed.password) if parsed.password else None,
+                    "host": host
+                }
+                connect_params = {k: v for k, v in connect_params.items() if v is not None}
+                
+                conn = psycopg2.connect(**connect_params)
+                cur = conn.cursor()
+                cur.execute(
+                    'UPDATE "AgentJob" SET "logs" = %s, "currentStep" = %s, "updatedAt" = NOW() WHERE "id" = %s',
+                    ("\n".join(context_obj.history), current_step, context_obj.job_id)
+                )
+            conn.commit()
+            cur.close()
+            conn.close()
+        except Exception as db_err:
+            print(f"[DB LOG ERROR] {db_err}")
+
     # Fallback / Shim Implementation
     @dataclass
     class AgentContext:
@@ -58,50 +167,9 @@ except ImportError:
             self.history.append(message)
             try:
                 print(f"[System Log] {message}")
-            except UnicodeEncodeError:
-                import sys
-                try:
-                    encoding = sys.stdout.encoding or 'utf-8'
-                    print(f"[System Log] {message.encode(encoding, errors='replace').decode(encoding)}")
-                except Exception:
-                    print(f"[System Log] [Encoding Error] Logging message failed.")
-            
-            # Direct Database Logging
-            if self.db_url and self.job_id:
-                try:
-                    # Extract current step (last agent tag)
-                    lines = "\n".join(self.history).strip().split("\n")
-                    current_step = None
-                    import re
-                    for i in range(len(lines)-1, -1, -1):
-                        match = re.match(r"^\[([^\]]+)\]\s*(.*)$", lines[i].strip())
-                        if match:
-                            current_step = f"{match.group(1)}: {match.group(2)}"[:100]
-                            break
-
-                    if self.db_url.startswith("file:") or "sqlite" in self.db_url.lower():
-                        import sqlite3
-                        db_path = self.db_url.replace("file:", "")
-                        if "?" in db_path: db_path = db_path.split("?")[0]
-                        conn = sqlite3.connect(db_path)
-                        cur = conn.cursor()
-                        cur.execute(
-                            'UPDATE "AgentJob" SET "logs" = ?, "currentStep" = ?, "updatedAt" = CURRENT_TIMESTAMP WHERE "id" = ?',
-                            ("\n".join(self.history), current_step, self.job_id)
-                        )
-                    else:
-                        import psycopg2
-                        conn = psycopg2.connect(self.db_url)
-                        cur = conn.cursor()
-                        cur.execute(
-                            'UPDATE "AgentJob" SET "logs" = %s, "currentStep" = %s, "updatedAt" = NOW() WHERE "id" = %s',
-                            ("\n".join(self.history), current_step, self.job_id)
-                        )
-                    conn.commit()
-                    cur.close()
-                    conn.close()
-                except Exception as db_err:
-                    print(f"[DB LOG ERROR] {db_err}")
+            except Exception:
+                pass
+            _update_db_logs(self)
 
     class BaseAgent(abc.ABC):
         """Abstract base class for all agents."""

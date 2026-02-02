@@ -115,7 +115,7 @@ export default function SettingsPage() {
                                             Primary Gemini Model
                                         </label>
                                         <p className="mt-1 text-xs text-gray-500 mb-2">
-                                            Default is <code>gemini-2.0-flash</code>.
+                                            Default is <code>gemini-3-flash-preview</code>.
                                         </p>
                                         <input
                                             type="text"
@@ -123,7 +123,7 @@ export default function SettingsPage() {
                                             value={googleModelName}
                                             onChange={(e) => setGoogleModelName(e.target.value)}
                                             className="block w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                            placeholder="e.g. gemini-2.0-flash"
+                                            placeholder="e.g. gemini-3-flash-preview"
                                         />
                                     </div>
 

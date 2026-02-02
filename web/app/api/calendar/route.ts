@@ -105,7 +105,7 @@ export async function PUT(req: Request) {
             include: { website: { include: { user: true } } }
         });
 
-        if (!existingItem || existingItem.website.user.email !== session.user.email) {
+        if (!existingItem || !existingItem.website || existingItem.website.user.email !== session.user.email) {
             return NextResponse.json({ message: "Forbidden" }, { status: 403 });
         }
 
@@ -145,7 +145,7 @@ export async function DELETE(req: Request) {
             include: { website: { include: { user: true } } }
         });
 
-        if (!existingItem || existingItem.website.user.email !== session.user.email) {
+        if (!existingItem || !existingItem.website || existingItem.website.user.email !== session.user.email) {
             return NextResponse.json({ message: "Forbidden" }, { status: 403 });
         }
 

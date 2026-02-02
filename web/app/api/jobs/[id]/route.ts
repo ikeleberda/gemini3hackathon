@@ -35,7 +35,7 @@ export async function GET(
         }
 
         // Verify website ownership
-        if (job.contentItem.website.user.email !== session.user.email) {
+        if (!job.contentItem.website || job.contentItem.website.user.email !== session.user.email) {
             return NextResponse.json({ message: "Forbidden" }, { status: 403 });
         }
 

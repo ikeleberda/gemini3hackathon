@@ -26,7 +26,7 @@ class LLMAgent(BaseAgent):
 
         if api_key or use_vertex:
             # Prepare model list: primary model first, then fallbacks
-            primary_model = getattr(self.context, 'google_model_name', None) or os.environ.get("GOOGLE_MODEL_NAME", "gemini-1.5-flash")
+            primary_model = getattr(self.context, 'google_model_name', None) or os.environ.get("GOOGLE_MODEL_NAME", "gemini-3-flash-preview")
             fallback_str = getattr(self.context, 'google_fallback_models', None) or os.environ.get("GOOGLE_FALLBACK_MODELS", "")
             # Support both comma and pipe delimiters to avoid CLI issues
             fallback_models = [m.strip() for m in fallback_str.replace("|", ",").split(",") if m.strip()]

@@ -75,9 +75,10 @@ def run_agents():
         context.topic = topic
         context.db_url = db_url
         context.job_id = job_id
-        context.google_api_key = google_api_key
-        context.google_model_name = google_model_name
-        context.google_fallback_models = google_fallback_models
+        # Use provided value or fallback to environment variables
+        context.google_api_key = google_api_key or os.environ.get('GOOGLE_API_KEY')
+        context.google_model_name = google_model_name or os.environ.get('GOOGLE_MODEL_NAME')
+        context.google_fallback_models = google_fallback_models or os.environ.get('GOOGLE_FALLBACK_MODELS')
         
         # Initialize the Manager
         manager = ManagerAgent(context)
@@ -125,7 +126,8 @@ def run_agents():
                         cur.execute('UPDATE "ContentItem" SET "status" = ?, "publishedUrl" = ?, "title" = COALESCE(?, "title"), "updatedAt" = CURRENT_TIMESTAMP WHERE "id" = ?', (final_status, published_url, published_title, cid))
                     else:
                         import psycopg2
-                        conn = psycopg2.connect(db_url)
+                        clean_url = db_url.split("?")[0] if "?" in db_url else db_url
+                        conn = psycopg2.connect(clean_url)
                         cur = conn.cursor()
                         cur.execute('UPDATE "AgentJob" SET "status" = %s, "logs" = %s, "currentStep" = %s, "updatedAt" = NOW() WHERE "id" = %s', ("COMPLETED", logs, "Completed", job_id))
                         cur.execute('SELECT "contentItemId" FROM "AgentJob" WHERE "id" = %s', (job_id,))
@@ -158,7 +160,8 @@ def run_agents():
                         cur.execute('UPDATE "AgentJob" SET "status" = ?, "logs" = ?, "updatedAt" = CURRENT_TIMESTAMP WHERE "id" = ?', ("FAILED", logs, job_id))
                     else:
                         import psycopg2
-                        conn = psycopg2.connect(db_url)
+                        clean_url = db_url.split("?")[0] if "?" in db_url else db_url
+                        conn = psycopg2.connect(clean_url)
                         cur = conn.cursor()
                         cur.execute('UPDATE "AgentJob" SET "status" = %s, "logs" = %s, "updatedAt" = NOW() WHERE "id" = %s', ("FAILED", logs, job_id))
                     conn.commit()
