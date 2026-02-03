@@ -41,4 +41,41 @@ class ResearcherAgent(LLMAgent):
         2. Identify the top 3-5 most authoritative external sources from the findings.
         3. At the end of your report, create a section "### AUTHORITATIVE EXTERNAL LINKS" and list them as [Title](URL).
         """
-        return super().run(prompt)
+        raw_briefing = super().run(prompt)
+        
+        self.log("Validating links in research briefing...")
+        import re
+        from tools.link_validator_tool import LinkValidatorTool
+        
+        # Regex to find markdown links: [text](url)
+        found_links = re.findall(r'\[([^\]]+)\]\((https?://[^\)]+)\)', raw_briefing)
+        
+        valid_links_section = "\n### AUTHORITATIVE EXTERNAL LINKS\n"
+        has_valid_links = False
+        
+        # Verify each link found in the briefing
+        unique_urls = set()
+        for text, url in found_links:
+            if url in unique_urls:
+                continue
+            
+            self.log(f"Researcher validation: {url}")
+            if LinkValidatorTool.is_link_valid(url):
+                valid_links_section += f"- [{text}]({url})\n"
+                has_valid_links = True
+                unique_urls.add(url)
+            else:
+                self.log(f"Researcher filtering dead link: {url}")
+                # Remove the dead link from the main text if it appears as a markdown link
+                raw_briefing = raw_briefing.replace(f"[{text}]({url})", text)
+        
+        # Split the briefing at the links section and rebuild it with only valid links
+        if "### AUTHORITATIVE EXTERNAL LINKS" in raw_briefing:
+            main_content = raw_briefing.split("### AUTHORITATIVE EXTERNAL LINKS")[0].strip()
+        else:
+            main_content = raw_briefing.strip()
+            
+        if has_valid_links:
+            return f"{main_content}\n{valid_links_section}"
+        else:
+            return main_content

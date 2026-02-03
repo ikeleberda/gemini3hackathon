@@ -1,0 +1,10 @@
+# .gcloudignore for web component
+.git/
+node_modules/
+.next/
+out/
+build/
+*.db
+*.sqlite
+.env*
+!env.yaml

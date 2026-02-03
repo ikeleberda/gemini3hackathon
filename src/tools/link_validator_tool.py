@@ -25,12 +25,12 @@ class LinkValidatorTool:
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
             }
             
-            # Try HEAD request first
-            response = requests.head(url, timeout=timeout, allow_redirects=True, verify=False, headers=headers)
+            # Skip HEAD if we want to be thorough about soft 404s, 
+            # but for performance we can keep it and just be aware of the limitation.
+            # However, "pages not found" is the priority.
             
-            # If HEAD fails or gives non-200, try GET
-            if response.status_code not in [200, 403]:
-                response = requests.get(url, timeout=timeout, allow_redirects=True, stream=True, verify=False, headers=headers)
+            # Use GET with stream=True to avoid downloading large files, but allowing content check
+            response = requests.get(url, timeout=timeout, allow_redirects=True, stream=True, verify=False, headers=headers)
             
             # Accept 200 (OK) and 403 (Forbidden - likely anti-bot, but link exists)
             # We strictly reject 404 (Not Found) and 5xx (Server Errors)
@@ -41,12 +41,24 @@ class LinkValidatorTool:
             # Only check for small HTML responses to avoid performance hits
             content_type = response.headers.get('Content-Type', '').lower()
             if 'text/html' in content_type:
-                # Read just the beginning of the content
-                content_chunk = response.iter_content(chunk_size=1024)
-                first_chunk = next(content_chunk, b'').decode('utf-8', errors='ignore').lower()
+                # Read more of the content to find soft 404 indicators
+                # Some sites have the error message further down
+                content_chunks = []
+                try:
+                    for i, chunk in enumerate(response.iter_content(chunk_size=2048)):
+                        content_chunks.append(chunk.decode('utf-8', errors='ignore').lower())
+                        if i >= 2: # Check up to ~6KB of content
+                            break
+                except:
+                    pass
                 
-                error_keywords = ["404 not found", "page not found", "doesn't exist", "can't be found", "404 - "]
-                if any(kw in first_chunk for kw in error_keywords):
+                full_text = "".join(content_chunks)
+                
+                error_keywords = [
+                    "404 not found", "page not found", "doesn't exist", "can't be found", 
+                    "404 - ", "error 404", "sorry, the page you requested", "404: page not found"
+                ]
+                if any(kw in full_text for kw in error_keywords):
                     return False
             
             return True

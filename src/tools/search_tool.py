@@ -36,13 +36,13 @@ class SearchTool:
             if "items" in data:
                 for item in data["items"]:
                     link = item.get("link")
-                    if LinkValidatorTool.is_link_valid(link):
+                    if link and LinkValidatorTool.is_link_valid(link):
                         results.append({
                             "title": item.get("title"),
                             "link": link,
                             "snippet": item.get("snippet")
                         })
-                    else:
+                    elif link:
                         print(f"  -> LinkValidator: Filtering dead link: {link}")
             return results
         except Exception as e:
