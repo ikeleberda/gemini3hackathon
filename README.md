@@ -4,6 +4,9 @@
 
 FlowPress: Autonomous Content Engine is not just a writer—it's an intelligent agency. It orchestrates a swarm of **Gemini 3 powered agents** to research, reason, write, critique, and publish high-quality content to WordPress.
 
+DEMO: https://fractal-web-635270291770.us-central1.run.app/demo
+
+
 ## 🏆 Gemini 3 Hackathon Submission
 *   **Reasoning Engine:** Google Gemini 3
 *   **Architecture:** Multi-Agent Swarm (Google ADK)
