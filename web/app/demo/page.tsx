@@ -104,12 +104,6 @@ export default function DemoPage() {
                             <Link href="/login" className="text-sm font-medium text-gray-700 hover:text-indigo-600">
                                 Sign In
                             </Link>
-                            <Link
-                                href="/register"
-                                className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition-all"
-                            >
-                                Get Started
-                            </Link>
                         </div>
                     </div>
                 </div>
@@ -256,9 +250,6 @@ export default function DemoPage() {
                     <div className="mt-8 text-center text-sm text-gray-500 max-w-2xl mx-auto">
                         <p>
                             <strong>Note:</strong> This demo performs real-time research and publishing.
-                            <Link href="/register" className="text-indigo-600 hover:underline mx-1">
-                                Sign up
-                            </Link>
                             to unlock advanced models, multiple websites, and scheduling.
                         </p>
                     </div>
